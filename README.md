@@ -89,4 +89,4 @@ npm start
 ```
 ## Mobil İndirme
 
-- **Reponun releases kısmında apk linki mevcuttur.
+- **Reponun releases kısmında apk linki mevcuttur.**
