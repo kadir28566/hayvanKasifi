@@ -87,6 +87,6 @@ npm install -g @expo/cli
 ```bash
 npm start
 ```
-##Mobil İndirme
+## Mobil İndirme
 
-- ** eponun releases kısmında apk linki mevcuttur.
+- **Reponun releases kısmında apk linki mevcuttur.
