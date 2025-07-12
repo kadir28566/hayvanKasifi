@@ -9,7 +9,8 @@ import {
   Alert,
   StatusBar
 } from 'react-native';
-import { Camera } from 'expo-camera';
+// Expo SDK 49+ için yeni import
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import { getRandomAnimal, getRandomQuestion, animalQuestions } from '../data/questions';
 import {
   saveScore,
@@ -24,7 +25,7 @@ import {
 const { width, height } = Dimensions.get('window');
 
 const CameraScreen = () => {
-  const [hasPermission, setHasPermission] = useState(null);
+  const [permission, requestPermission] = useCameraPermissions();
   const [cameraType, setCameraType] = useState('back');
   const [currentAnimal, setCurrentAnimal] = useState(null);
   const [currentQuestion, setCurrentQuestion] = useState(null);
@@ -38,10 +39,6 @@ const CameraScreen = () => {
   const cameraRef = useRef(null);
 
   useEffect(() => {
-    (async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync();
-      setHasPermission(status === 'granted');
-    })();
     loadGameData();
   }, []);
 
@@ -153,20 +150,29 @@ const CameraScreen = () => {
     return styles.answerButton;
   };
 
-  if (hasPermission === null) {
-    return <View style={styles.container}><Text>Kamera izni isteniyor...</Text></View>;
+  // İzin kontrolü
+  if (!permission) {
+    return <View style={styles.container}><Text>Kamera izni kontrol ediliyor...</Text></View>;
   }
-  if (hasPermission === false) {
-    return <View style={styles.container}><Text>Kameraya erişim izni verilmedi.</Text></View>;
+
+  if (!permission.granted) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.permissionText}>Kamera kullanmak için izin gerekli</Text>
+        <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
+          <Text style={styles.permissionButtonText}>İzin Ver</Text>
+        </TouchableOpacity>
+      </View>
+    );
   }
 
   return (
     <View style={styles.container}>
       <StatusBar hidden />
       
-      <Camera 
+      <CameraView 
         style={styles.camera} 
-        type={cameraType} 
+        facing={cameraType}
         ref={cameraRef}
       >
         <View style={styles.overlay}>
@@ -223,7 +229,7 @@ const CameraScreen = () => {
             activeOpacity={1}
           />
         </View>
-      </Camera>
+      </CameraView>
     </View>
   );
 };
@@ -238,6 +244,24 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.3)',
+  },
+  permissionText: {
+    fontSize: 18,
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  permissionButton: {
+    backgroundColor: '#4CAF50',
+    padding: 15,
+    borderRadius: 10,
+    marginHorizontal: 50,
+  },
+  permissionButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   statsContainer: {
     flexDirection: 'row',
@@ -356,4 +380,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CameraScreen; 
+export default CameraScreen;
